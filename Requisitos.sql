@@ -65,7 +65,7 @@ BEGIN
 END;
 /
 
-/*Requisito 5: comprobar cuantos participantes disponibles quedan en una carrera*/
+/*Requisito 4: comprobar cuantos participantes disponibles quedan en una carrera*/
 CREATE OR REPLACE FUNCTION ParticipantesDispEnCarrera(Codigo_Carrera in Carrera.Codigo_Carrera%TYPE)
 RETURN VARCHAR
 IS ParticipantesDisponibles Carrera.Max_Participantes%TYPE;
@@ -77,7 +77,7 @@ BEGIN
 END ParticipantesDispEnCarrera;
 /
 
-/*Requisito 6: buscar a que escuderia pertenece un determinado modelo de coche*/
+/*Requisito 5: buscar a que escuderia pertenece un determinado modelo de coche*/
 CREATE OR REPLACE FUNCTION BuscarEscuderiaDeModelo (cursorMemoria out 
 SYS_REFCURSOR, ModeloCoche IN Coche.Modelo%TYPE)
 RETURN VARCHAR2 IS
@@ -87,104 +87,6 @@ END BuscarEscuderiaDeModelo;
 /
 
 /*Requisito 6: no esta permitido introducir datos en ninguna tabla entre las 3:00 y las 4:59 horas. Supongamos que es una medida preventiva
-para poder realizar una copia de seguridad diaria con mayor eficiencia*/
-CREATE OR REPLACE TRIGGER LIMITACIONHORASCARRERA
-    BEFORE INSERT ON CARRERA
-    BEGIN
-        IF (TO_CHAR(SYSDATE,'HH24') IN ('3','4')) THEN
-            RAISE_APPLICATION_ERROR (-20003,'No se puede añadir datos a la base de datos entre las 3:00 y las 4:59');
-    END IF;
-END;
-/
-
-CREATE OR REPLACE TRIGGER LIMITACIONHORASCOCHE
-    BEFORE INSERT ON COCHE
-    BEGIN
-        IF (TO_CHAR(SYSDATE,'HH24') IN ('3','4')) THEN
-            RAISE_APPLICATION_ERROR (-20003,'No se puede añadir datos a la base de datos entre las 3:00 y las 4:59');
-    END IF;
-END;
-/
-
-CREATE OR REPLACE TRIGGER LIMITACIONHORASESCUDERIA
-    BEFORE INSERT ON ESCUDERIA
-    BEGIN
-        IF (TO_CHAR(SYSDATE,'HH24') IN ('3','4')) THEN
-            RAISE_APPLICATION_ERROR (-20003,'No se puede añadir datos a la base de datos entre las 3:00 y las 4:59');
-    END IF;
-END;
-/
-
-CREATE OR REPLACE TRIGGER LIMITACIONHORASJEFEESCUDERIA
-    BEFORE INSERT ON JEFEESCUDERIA
-    BEGIN
-        IF (TO_CHAR(SYSDATE,'HH24') IN ('3','4')) THEN
-            RAISE_APPLICATION_ERROR (-20003,'No se puede añadir datos a la base de datos entre las 3:00 y las 4:59');
-    END IF;
-END;
-/
-
-CREATE OR REPLACE TRIGGER LIMITACIONHORASPARTICIPANTE
-    BEFORE INSERT ON PARTICIPANTE
-    BEGIN
-        IF (TO_CHAR(SYSDATE,'HH24') IN ('3','4')) THEN
-            RAISE_APPLICATION_ERROR (-20003,'No se puede añadir datos a la base de datos entre las 3:00 y las 4:59');
-    END IF;
-END;
-/
-
-CREATE OR REPLACE TRIGGER LIMITACIONHORASPILOTO
-    BEFORE INSERT ON PILOTO
-    BEGIN
-        IF (TO_CHAR(SYSDATE,'HH24') IN ('3','4')) THEN
-            RAISE_APPLICATION_ERROR (-20003,'No se puede añadir datos a la base de datos entre las 3:00 y las 4:59');
-    END IF;
-END;
-/
-
-/*Requisito 4: generar un listado de coches dada una escuderia*/
-CREATE OR REPLACE PROCEDURE ListaCochesSegunEscuderia(Escuderia in Coche.Escuderia%TYPE)
-IS
-    
-    CURSOR C IS
-        SELECT Co.Modelo, Co.Categoria, Co.Peso, Co.Potencia FROM Coche Co WHERE Co.Escuderia = Escuderia;
-        W_MODELO VARCHAR2(40);
-        W_CATEGORIA CHAR(3);
-        W_PESO NUMBER(4);
-        W_POTENCIA NUMBER(3);
-BEGIN
-    OPEN C;
-    LOOP
-     FETCH C INTO W_MODELO, W_CATEGORIA, W_PESO, W_POTENCIA;
-     EXIT WHEN C%NOTFOUND;
-     DBMS_OUTPUT.PUT_LINE('MODELO: '|| W_MODELO ||' CATEGORIA: '|| W_CATEGORIA || ' PESO: ' || W_PESO || 'KG POTENCIA: ' || W_POTENCIA || 'CV');
-    END LOOP;
-    CLOSE C;
-END;
-/
-
-/*Requisito 5: comprobar cuantos participantes disponibles quedan en una carrera*/
-CREATE OR REPLACE FUNCTION ParticipantesDispEnCarrera(Codigo_Carrera in Carrera.Codigo_Carrera%TYPE)
-RETURN VARCHAR
-IS ParticipantesDisponibles Carrera.Max_Participantes%TYPE;
-Maximo_Participantes Carrera.Max_Participantes%TYPE;
-BEGIN
-    SELECT C.Max_Participantes INTO Maximo_Participantes FROM Carrera C WHERE C.Codigo_Carrera = Codigo_Carrera;
-    SELECT COUNT(*) INTO ParticipantesDisponibles FROM Participante P WHERE P.Codigo_Carrera = Codigo_Carrera;
-    RETURN ('Quedan ' || Maximo_Participantes-participantesdisponibles || ' plazas libres en la carrera');
-END ParticipantesDispEnCarrera;
-/
-
-/*Requisito 6: buscar a que escuderia pertenece un determinado modelo de coche*/
-CREATE OR REPLACE FUNCTION BuscarEscuderiaDeModelo (cursorMemoria out 
-SYS_REFCURSOR, ModeloCoche IN Coche.Modelo%TYPE)
-RETURN VARCHAR2 IS
-BEGIN
-OPEN cursorMemoria FOR SELECT Escuderia FROM Coche WHERE Modelo=ModeloCoche;
-END BuscarEscuderiaDeModelo;
-/
-
-/*Requisito 7: no esta permitido introducir datos en ninguna tabla entre las 3:00 y las 4:59 horas. Supongamos que es una medida preventiva
 para poder realizar una copia de seguridad diaria con mayor eficiencia*/
 CREATE OR REPLACE TRIGGER LIMITACIONHORASCARRERA
     BEFORE INSERT ON CARRERA
