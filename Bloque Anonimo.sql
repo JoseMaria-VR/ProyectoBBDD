@@ -17,12 +17,12 @@ BEGIN
     V_PAISORIGEN = 'España';
 END;
 /
-EXEC ListaPilotosSegunNacionalidad(V_PAISORIGEN);
-EXEC ListaCochesSegunEscuderia(V_ESCUDERIA);
+EXEC ListaPilotosSegunNacionalidad('España');
+EXEC ListaCochesSegunEscuderia('Ferrari');
 
 
 /*El siguiente bloque comprobara el funcionamiento de la tabla AUDITORIA*/
-INSERT INTO PILOTO VALUES (NUMLICENCIA.NEXTVAL, 'Takuma Sato', 'Corea del Sur', TO_DATE('28/01/1977', 'DD/MM/YYYY');
+INSERT INTO PILOTO VALUES (NUMLICENCIA.NEXTVAL, 'Takuma Sato', 'Corea del Sur', TO_DATE('28/01/1977', 'DD/MM/YYYY'));
 UPDATE PILOTO SET PAISORIGEN = 'Japón' WHERE NOMBRE = 'Takuma Sato';
 DELETE FROM PILOTO WHERE NOMBRE = 'Takuma Sato';
 /*Ejecute el siguiente SELECT para comprobaciones de AUDITORIA
