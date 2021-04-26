@@ -78,11 +78,12 @@ END ParticipantesDispEnCarrera;
 /
 
 /*Requisito 5: buscar a que escuderia pertenece un determinado modelo de coche*/
-CREATE OR REPLACE FUNCTION BuscarEscuderiaDeModelo (cursorMemoria out 
-SYS_REFCURSOR, ModeloCoche IN Coche.Modelo%TYPE)
+create or replace FUNCTION BuscarEscuderiaDeModelo (ModeloCoche IN Coche.Modelo%TYPE)
 RETURN VARCHAR2 IS
+    EscuderiaPedida VARCHAR2(20);
 BEGIN
-OPEN cursorMemoria FOR SELECT Escuderia FROM Coche WHERE Modelo=ModeloCoche;
+SELECT Escuderia INTO EscuderiaPedida FROM Coche WHERE Modelo=ModeloCoche;
+RETURN EscuderiaPedida;
 END BuscarEscuderiaDeModelo;
 /
 
