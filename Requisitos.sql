@@ -1,5 +1,4 @@
 /*Requisito 1: controlar las acciones que se realicen en la tabla PILOTO en una tabla auditoria*/
-DROP TABLE AUDITORIA;
 CREATE TABLE AUDITORIA(
     DESCRIPCION VARCHAR2(500)
 );
@@ -9,15 +8,15 @@ CREATE OR REPLACE TRIGGER AUDITORIAPILOTO
     FOR EACH ROW
 BEGIN
     IF INSERTING THEN
-    INSERT INTO AUDITORIA VALUES('<'||USER||'> - <'||SYSDATE||'> - <INSERT> - <'||
+    INSERT INTO AUDITORIA VALUES('<'||USER||'> - <'||CURRENT_TIMESTAMP||'> - <INSERT> - <'||
     'NUMLICENCIA: '||:NEW.NUMLICENCIA||' | '||'PILOTO: '||:NEW.NOMBRE||' | '||
     'PAIS ORIGEN: '||:NEW.PAISORIGEN||' | '||'FECHA NACIMIENTO: '||TO_DATE(:NEW.FECHANAC, 'DD/MM/YYYY'));
     ELSIF UPDATING THEN
-    INSERT INTO AUDITORIA VALUES('<'||USER||'> - <'||SYSDATE||'> - <UPDATE> - <'||
+    INSERT INTO AUDITORIA VALUES('<'||USER||'> - <'||CURRENT_TIMESTAMP||'> - <UPDATE> - <'||
     'NUMLICENCIA: '||:OLD.NUMLICENCIA||' | '||'PILOTO: '||:OLD.NOMBRE||' | '||
     'PAIS ORIGEN: '||:OLD.PAISORIGEN||' | '||'FECHA NACIMIENTO: '||TO_DATE(:OLD.FECHANAC, 'DD/MM/YYYY'));
     ELSIF DELETING THEN
-    INSERT INTO AUDITORIA VALUES('<'||USER||'> - <'||SYSDATE||'> - <DELETE> - <'||
+    INSERT INTO AUDITORIA VALUES('<'||USER||'> - <'||CURRENT_TIMESTAMP||'> - <DELETE> - <'||
     'NUMLICENCIA: '||:OLD.NUMLICENCIA||' | '||'PILOTO: '||:OLD.NOMBRE||' | '||
     'PAIS ORIGEN: '||:OLD.PAISORIGEN||' | '||'FECHA NACIMIENTO: '||TO_DATE(:OLD.FECHANAC, 'DD/MM/YYYY'));
     END IF;
@@ -25,7 +24,7 @@ END;
 /
 
 /*Requisito 2: generar un listado de pilotos dada una nacionalidad*/
-CREATE OR REPLACE PROCEDURE ListaPilotosSegunNacionalidad(PaisOrigen in Piloto.PaisOrigen%TYPE)
+create or replace PROCEDURE ListaPilotosSegunNacionalidad(PaisOrigen in Piloto.PaisOrigen%TYPE)
 IS
     
     CURSOR C IS
@@ -45,7 +44,7 @@ END;
 /
 
 /*Requisito 3: generar un listado de coches dada una escuderia*/
-CREATE OR REPLACE PROCEDURE ListaCochesSegunEscuderia(Escuderia in Coche.Escuderia%TYPE)
+create or replace PROCEDURE ListaCochesSegunEscuderia(Escuderia in Coche.Escuderia%TYPE)
 IS
     
     CURSOR C IS
@@ -66,24 +65,32 @@ END;
 /
 
 /*Requisito 4: comprobar cuantos participantes disponibles quedan en una carrera*/
-CREATE OR REPLACE FUNCTION ParticipantesDispEnCarrera(Codigo_Carrera in Carrera.Codigo_Carrera%TYPE)
-RETURN VARCHAR
-IS ParticipantesDisponibles Carrera.Max_Participantes%TYPE;
+create or replace FUNCTION ParticipantesDispEnCarrera(Codigo_Carrera NUMBER)
+RETURN NUMBER
+IS ParticipantesInscritos Carrera.Max_Participantes%TYPE;
 Maximo_Participantes Carrera.Max_Participantes%TYPE;
+Max_Participantes NUMBER;
+PartInscritos NUMBER;
 BEGIN
     SELECT C.Max_Participantes INTO Maximo_Participantes FROM Carrera C WHERE C.Codigo_Carrera = Codigo_Carrera;
-    SELECT COUNT(*) INTO ParticipantesDisponibles FROM Participante P WHERE P.Codigo_Carrera = Codigo_Carrera;
-    RETURN ('Quedan ' || Maximo_Participantes-participantesdisponibles || ' plazas libres en la carrera');
+    Max_Participantes := Maximo_Participantes;
+    SELECT COUNT(*) INTO ParticipantesInscritos FROM Participante P WHERE P.Codigo_Carrera = Codigo_Carrera;
+    PartInscritos := ParticipantesInscritos;
+    RETURN Max_Participantes - PartInscritos;
 END ParticipantesDispEnCarrera;
 /
 
 /*Requisito 5: buscar a que escuderia pertenece un determinado modelo de coche*/
-create or replace FUNCTION BuscarEscuderiaDeModelo (ModeloCoche IN Coche.Modelo%TYPE)
+create or replace FUNCTION BuscarEscuderiaDeModelo (ModeloCoche VARCHAR2)
 RETURN VARCHAR2 IS
-    EscuderiaPedida VARCHAR2(20);
+    EscuderiaPedida coche.escuderia%TYPE;
 BEGIN
-SELECT Escuderia INTO EscuderiaPedida FROM Coche WHERE Modelo=ModeloCoche;
-RETURN EscuderiaPedida;
+    SELECT Escuderia INTO EscuderiaPedida FROM Coche WHERE Modelo=ModeloCoche;
+    RETURN EscuderiaPedida;
+    EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        RAISE_APPLICATION_ERROR(-20002, 'El modelo en cuestion no esta registrado');
+        RETURN '';
 END BuscarEscuderiaDeModelo;
 /
 
