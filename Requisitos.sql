@@ -24,41 +24,36 @@ END;
 /
 
 /*Requisito 2: generar un listado de pilotos dada una nacionalidad*/
-create or replace PROCEDURE ListaPilotosSegunNacionalidad(PaisOrigen in Piloto.PaisOrigen%TYPE)
-IS
+create or replace PROCEDURE ListaPilotosSegunNacionalidad(Pais VARCHAR2)
+AS
     
     CURSOR C IS
-        SELECT P.Nombre, P.NumLicencia, P.FechaNac FROM Piloto P WHERE P.PaisOrigen = PaisOrigen;
-        W_NOMBRE VARCHAR2(30);
-        W_NUMLICENCIA NUMBER(8);
-        W_FECHANAC DATE;
+        (SELECT Nombre, NumLicencia, FechaNac FROM Piloto WHERE PaisOrigen = Pais);
+        W_FILA C%ROWTYPE;
 BEGIN
     OPEN C;
     LOOP
-     FETCH C INTO W_NOMBRE, W_NUMLICENCIA, W_FECHANAC;
+     FETCH C INTO W_FILA;
      EXIT WHEN C%NOTFOUND;
-     DBMS_OUTPUT.PUT_LINE('NOMBRE: '|| W_NOMBRE ||' NUMERO DE LICENCIA: '|| W_NUMLICENCIA || ' FECHA DE NACIMIENTO: ' || W_FECHANAC);
+     DBMS_OUTPUT.PUT_LINE('NOMBRE: '|| W_FILA.NOMBRE ||' NUMERO DE LICENCIA: '|| W_FILA.NUMLICENCIA || ' FECHA DE NACIMIENTO: ' || W_FILA.FECHANAC);
     END LOOP;
     CLOSE C;
 END;
 /
 
 /*Requisito 3: generar un listado de coches dada una escuderia*/
-create or replace PROCEDURE ListaCochesSegunEscuderia(Escuderia in Coche.Escuderia%TYPE)
-IS
+create or replace PROCEDURE ListaCochesSegunEscuderia(EscuderiaDada VARCHAR2)
+AS
     
     CURSOR C IS
-        SELECT Co.Modelo, Co.Categoria, Co.Peso, Co.Potencia FROM Coche Co WHERE Co.Escuderia = Escuderia;
-        W_MODELO VARCHAR2(40);
-        W_CATEGORIA CHAR(3);
-        W_PESO NUMBER(4);
-        W_POTENCIA NUMBER(3);
+        (SELECT Modelo, Categoria, Peso, Potencia FROM Coche WHERE Escuderia = EscuderiaDada);
+        W_FILA C%ROWTYPE;
 BEGIN
     OPEN C;
     LOOP
-     FETCH C INTO W_MODELO, W_CATEGORIA, W_PESO, W_POTENCIA;
+     FETCH C INTO W_FILA;
      EXIT WHEN C%NOTFOUND;
-     DBMS_OUTPUT.PUT_LINE('MODELO: '|| W_MODELO ||' CATEGORIA: '|| W_CATEGORIA || ' PESO: ' || W_PESO || 'KG POTENCIA: ' || W_POTENCIA || 'CV');
+     DBMS_OUTPUT.PUT_LINE('MODELO: '|| W_FILA.MODELO ||' CATEGORIA: '|| W_FILA.CATEGORIA || ' PESO: ' || W_FILA.PESO || 'KG POTENCIA: ' || W_FILA.POTENCIA || 'CV');
     END LOOP;
     CLOSE C;
 END;
